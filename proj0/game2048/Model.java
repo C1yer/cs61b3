@@ -187,7 +187,7 @@ public class Model extends Observable {
             for(int j=0;j<b.size();j++){
                 if(b.tile(i,j)==null)
                 {
-                    System.out.println("该元素为空");
+
                     continue;
                 }
                 if (max<b.tile(i,j).value())
