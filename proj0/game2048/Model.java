@@ -107,13 +107,39 @@ public class Model extends Observable {
      *    and the trailing tile does not.
      * */
     public boolean tilt(Side side) {
+
+        board.setViewingPerspective(side);
         boolean changed;
         changed = false;
-
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
+        for (int i = 0; i < board.size(); i++) {
+            int k = board.size() - 1;
+            for (int j = board.size() - 2; j >= 0; j--) {
+                Tile t = board.tile(i, j);
+                if (t == null) {
+                    continue;
+                }
+                while (k > j && board.tile(i, k) != null && board.tile(i, k).value() != t.value()){
+                    //跳出循环的后两种 一种是等于0一种是相等，那就可以合并
+                    //不用担心中间有数过不去，因为k在整个小循环里面都不变
+                    //可以理解为你上一个数都过不去，那你也别想了
+                    k--;
+                }
+                if (k == j) {
+                    //若是因为k等于j退出循环的，那说明就没有预期情况，pass
+                    continue;
+                }
+                if (board.move(i, k, t)) {
+                    score += board.tile(i, k).value();
+                    k--;
+                }
+                changed = true;
+            }
+        }
 
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -138,7 +164,15 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
-        return false;
+        boolean real=false;
+        for (int i=0;i<b.size();i++){
+            for(int j=0;j<b.size();j++){
+                if (b.tile(i,j)==null)
+                    real=true;
+
+            }
+        }
+        return real;
     }
 
     /**
@@ -148,6 +182,18 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        int max=0;
+        for (int i=0;i<b.size();i++){
+            for(int j=0;j<b.size();j++){
+                if(b.tile(i,j)==null)
+                {
+                    System.out.println("该元素为空");
+                    continue;
+                }
+                if (max<b.tile(i,j).value())
+                    max=b.tile(i,j).value();
+            }
+        }if(max==MAX_PIECE)return  true;
         return false;
     }
 
@@ -158,7 +204,30 @@ public class Model extends Observable {
      * 2. There are two adjacent tiles with the same value.
      */
     public static boolean atLeastOneMoveExists(Board b) {
-        // TODO: Fill in this function.
+        // TODO: Fill in this function.//空位或者四周有相似值
+        if(emptySpaceExists(b))return true;
+        for (int i=0;i<b.size();i++){
+            for(int j=0;j<b.size();j++){
+              if(b.tile(i,j)!=null){
+                  if(((j+1)<b.size())&&(b.tile(i,j+1)!=null)){
+                      if(b.tile(i,j).value()==b.tile(i,j+1).value())
+                          return true;
+                  }
+                  if(((j-1)>-1)&&(b.tile(i,j-1)!=null)){
+                      if(b.tile(i,j).value()==b.tile(i,j-1).value())
+                          return true;
+                  }
+                  if(((i+1)<b.size())&&(b.tile(i+1,j)!=null)){
+                      if(b.tile(i,j).value()==b.tile(i+1,j).value())
+                          return true;
+                  }
+                  if(((i-1)>0)&&(b.tile(i-1,j)!=null)){
+                      if(b.tile(i,j).value()==b.tile(i-1,j).value())
+                          return true;
+                  }
+              }
+            }
+        }
         return false;
     }
 
